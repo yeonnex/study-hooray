@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequiredArgsConstructor
 public class AccountController {
     private final SignUpFormValidator signUpFormValidator;
-    private final AccountRepository accountRepository;
-
-    private final JavaMailSender javaMailSender;
+    private final AccountService accountService;
 
     @GetMapping("/sign-up")
     public String signUpForm(Model model) {
@@ -33,26 +31,10 @@ public class AccountController {
         }
         signUpFormValidator.validate(signUpForm, errors);
 
-        Account account = Account.builder()
-                .email(signUpForm.getEmail())
-                .nickname(signUpForm.getNickname())
-                .password(signUpForm.getPassword())
-                .studyCreatedByWeb(true)
-                .studyEnrollmentResultByWeb(true)
-                .studyUpdatedByWeb(true)
-                .build();
-
-        Account newAccount = accountRepository.save(account);
-        newAccount.generateEmailCheckToken();
-
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(newAccount.getEmail());
-        mailMessage.setSubject("Study Hooray, 회원 가입 인증");
-        mailMessage.setText("/check-email-token?token=" + newAccount.getEmailCheckToken() +
-            "&email=" + newAccount.getEmail());
-
-        javaMailSender.send(mailMessage);
+        accountService.processNewAccount(signUpForm);
 
         return "redirect:/";
     }
+
+
 }
