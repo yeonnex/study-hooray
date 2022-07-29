@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -27,7 +28,7 @@ public class Account {
 
     private boolean emailVerified;
 
-    private boolean emailCheckToken;
+    private String emailCheckToken;
 
     private LocalDateTime joinedAt;
 
@@ -55,4 +56,7 @@ public class Account {
 
     private boolean studyUpdatedByWeb;
 
+    public void generateEmailCheckToken() {
+        this.emailCheckToken = UUID.randomUUID().toString();
+    }
 }
