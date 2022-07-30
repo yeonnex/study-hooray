@@ -40,7 +40,6 @@ public class AccountController {
     }
 
     @GetMapping("/check-email-token")
-//    @Transactional // TODO 컨트롤러에서 트랜잭션 있는게 마음에 걸림
     public String checkEmailToken(@RequestParam String token, @RequestParam String email, Model model) {
         Account account = accountRepository.findByEmail(email);
         String view = "account/checked-email";
@@ -49,7 +48,7 @@ public class AccountController {
             model.addAttribute("error", "wrong.email");
             return view;
         }
-        if ( ! account.getEmailCheckToken().equals(token)) {
+        if ( ! account.isValidToken(token)) {
             model.addAttribute("error", "wrong.email");
             return view;
         }
