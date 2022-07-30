@@ -20,6 +20,10 @@ public class AccountService {
         sendSignUpConfirmEmail(account);
     }
 
+    public Account getAccountByEmail(String email) {
+        return accountRepository.findByEmail(email);
+    }
+
     private Account saveNewAccount(SignUpForm signUpForm) {
         Account account = Account.builder()
                 .email(signUpForm.getEmail())
@@ -29,14 +33,14 @@ public class AccountService {
                 .studyEnrollmentResultByWeb(true)
                 .studyUpdatedByWeb(true)
                 .build();
-
+        account.generateEmailCheckToken();
         Account newAccount = accountRepository.save(account);
         return newAccount;
     }
 
     private void sendSignUpConfirmEmail(Account newAccount) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
-        newAccount.generateEmailCheckToken();
+
         mailMessage.setTo(newAccount.getEmail());
         mailMessage.setSubject("Study Hooray, 회원 가입 인증");
         mailMessage.setText("/check-email-token?token=" + newAccount.getEmailCheckToken() +
