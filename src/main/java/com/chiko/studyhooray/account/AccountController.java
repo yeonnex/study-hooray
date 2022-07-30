@@ -4,6 +4,7 @@ import com.chiko.studyhooray.domain.Account;
 import com.chiko.studyhooray.model.SignUpForm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -39,6 +40,7 @@ public class AccountController {
     }
 
     @GetMapping("/check-email-token")
+//    @Transactional // TODO 컨트롤러에서 트랜잭션 있는게 마음에 걸림
     public String checkEmailToken(@RequestParam String token, @RequestParam String email, Model model) {
         Account account = accountRepository.findByEmail(email);
         String view = "account/checked-email";
@@ -52,13 +54,11 @@ public class AccountController {
             return view;
         }
 
-        account.setEmailVerified(true);
-        account.setJoinedAt(LocalDateTime.now());
+        accountService.completeSignUp(account);
 
         model.addAttribute("numberOfUser", accountRepository.count());
         model.addAttribute("nickname", account.getNickname());
         return view;
     }
-
 
 }

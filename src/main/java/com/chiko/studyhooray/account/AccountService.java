@@ -7,6 +7,9 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +23,6 @@ public class AccountService {
         sendSignUpConfirmEmail(account);
     }
 
-    public Account getAccountByEmail(String email) {
-        return accountRepository.findByEmail(email);
-    }
-
     private Account saveNewAccount(SignUpForm signUpForm) {
         Account account = Account.builder()
                 .email(signUpForm.getEmail())
@@ -34,8 +33,7 @@ public class AccountService {
                 .studyUpdatedByWeb(true)
                 .build();
         account.generateEmailCheckToken();
-        Account newAccount = accountRepository.save(account);
-        return newAccount;
+        return accountRepository.save(account);
     }
 
     private void sendSignUpConfirmEmail(Account newAccount) {
@@ -47,5 +45,11 @@ public class AccountService {
                 "&email=" + newAccount.getEmail());
 
         javaMailSender.send(mailMessage);
+    }
+
+    @Transactional
+    public void completeSignUp(Account account) {
+        account.setJoinedAt(LocalDateTime.now());
+        account.setEmailVerified(true);
     }
 }

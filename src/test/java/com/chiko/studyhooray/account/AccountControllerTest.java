@@ -1,6 +1,8 @@
 package com.chiko.studyhooray.account;
 
 import com.chiko.studyhooray.domain.Account;
+import org.aspectj.lang.annotation.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -11,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,9 +32,16 @@ class AccountControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @MockBean
     JavaMailSender javaMailSender;
+
+    @AfterEach
+    void afterEach() {
+        accountRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("회원 가입 화면 보이는지 테스트")
@@ -80,5 +90,54 @@ class AccountControllerTest {
         assertThat(account.getEmailCheckToken()).isNotNull();
         then(javaMailSender).should().send(ArgumentMatchers.any(SimpleMailMessage.class));
 
+    }
+
+    @Test
+    @DisplayName("인증 메일 확인 - 인증 메일 체크 정상")
+    void checkEmailToken() throws Exception {
+        Account account = generateAndSaveUser();
+        mockMvc.perform(get("/check-email-token")
+                .param("token", account.getEmailCheckToken())
+                .param("email", account.getEmail())
+        )
+                .andExpect(view().name("account/checked-email"))
+                .andExpect(model().attributeDoesNotExist("error"))
+                .andExpect(model().attributeExists("numberOfUser"))
+                .andExpect(model().attributeExists("nickname"));
+
+        Account savedUser = accountRepository.findByEmail(account.getEmail());
+        assertThat(savedUser.isEmailVerified()).isTrue();
+    }
+
+    @Test
+    @DisplayName("인증 메일 확인 - 인증 메일 체크 비정상")
+    void checkEmailToken_with_wrong_input() throws Exception {
+        Account account = generateAndSaveUser();
+
+        mockMvc.perform(get("/check-email-token")
+                .param("token", "asoefjlsadjf")
+                .param("email", account.getEmail())
+        )
+                .andExpect(view().name("account/checked-email"))
+                .andExpect(model().attributeExists("error"));
+
+        Account savedUser = accountRepository.findByEmail(account.getEmail());
+        assertThat(savedUser.isEmailVerified()).isFalse();
+
+    }
+
+
+    private Account generateAndSaveUser() {
+        Account account = Account.builder()
+                .email("testuser@gmail.com")
+                .nickname("testuser")
+                .password(passwordEncoder.encode("123456abc@"))
+                .studyCreatedByWeb(true)
+                .studyEnrollmentResultByWeb(true)
+                .studyUpdatedByWeb(true)
+                .build();
+        account.generateEmailCheckToken();
+
+        return accountRepository.save(account);
     }
 }
