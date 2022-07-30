@@ -19,6 +19,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -103,7 +105,9 @@ class AccountControllerTest {
                 .andExpect(view().name("account/checked-email"))
                 .andExpect(model().attributeDoesNotExist("error"))
                 .andExpect(model().attributeExists("numberOfUser"))
-                .andExpect(model().attributeExists("nickname"));
+                .andExpect(model().attributeExists("nickname"))
+                .andExpect(authenticated())
+        ;
 
         Account savedUser = accountRepository.findByEmail(account.getEmail());
         assertThat(savedUser.isEmailVerified()).isTrue();
@@ -119,7 +123,9 @@ class AccountControllerTest {
                 .param("email", account.getEmail())
         )
                 .andExpect(view().name("account/checked-email"))
-                .andExpect(model().attributeExists("error"));
+                .andExpect(model().attributeExists("error"))
+                .andExpect(unauthenticated())
+        ;
 
         Account savedUser = accountRepository.findByEmail(account.getEmail());
         assertThat(savedUser.isEmailVerified()).isFalse();

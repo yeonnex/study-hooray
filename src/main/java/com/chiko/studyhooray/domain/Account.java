@@ -1,7 +1,6 @@
 package com.chiko.studyhooray.domain;
 
 import lombok.*;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
