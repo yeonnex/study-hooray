@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns="">
 <head th:replace="fragments.html :: head">
 
 </head>
 <body class="bg-light">
 
 <nav th:replace="fragments.html :: main-nav" class="navbar navbar-expand-sm navbar-dark bg-dark">
+    <div class="alert alert-warning" role="alert" th:if="${account != null && !account .emailVerified}">
+        Study Hooray 가입을 완료하려면 계정 인증 이메일을 확인하세요
+    </div>
 
 </nav>
 <div class="container">

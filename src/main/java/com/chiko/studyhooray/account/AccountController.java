@@ -33,7 +33,7 @@ public class AccountController {
         signUpFormValidator.validate(signUpForm, errors);
 
         Account account = accountService.processNewAccount(signUpForm);
-//        accountService.login(account); TODO 이 코드 지워야할것 같다. 회원가입 절차를 아직 다 complete 하게 거치지 못했는데, 시큐리티 컨텍스트에 벌써 넣으면 안된다고 생각함.
+        accountService.login(account);
         return "redirect:/";
     }
 
