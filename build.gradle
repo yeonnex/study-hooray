@@ -1,6 +1,7 @@
 plugins {
     id 'org.springframework.boot' version '2.7.2'
     id 'io.spring.dependency-management' version '1.0.12.RELEASE'
+    id 'com.github.node-gradle.node' version '3.1.0'
     id 'java'
 }
 
@@ -16,9 +17,13 @@ configurations {
 
 repositories {
     mavenCentral()
+    gradlePluginPortal()
 }
 
 dependencies {
+    // npm
+    implementation 'com.github.node-gradle:gradle-node-plugin:3.1.0'
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
@@ -35,6 +40,20 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 }
+
+node {
+    version = '18.4.0' // 내가 사용하는 노드 버전
+    download = true
+    nodeModulesDir = file("${projectDir}/src/main/resources/static")
+}
+
+task copyFrontLib(type: Copy) {
+    from "${projectDir}/src/main/resources/static"
+    into "${projectDir}/build/resources/resources/static"
+}
+
+copyFrontLib.dependsOn npmInstall
+compileJava.dependsOn copyFrontLib
 
 tasks.named('test') {
     useJUnitPlatform()

@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -36,25 +37,36 @@ public class AccountController {
         return "redirect:/";
     }
 
+    /**
+     *
+     * @param token
+     * @param email
+     * @param redirectModel
+     * @param defaultModel
+     * @return
+     */
     @GetMapping("/check-email-token")
-    public String checkEmailToken(@RequestParam String token, @RequestParam String email, Model model) {
+    public String checkEmailToken(@RequestParam String token,
+                                  @RequestParam String email,
+                                  RedirectAttributes redirectModel,
+                                  Model defaultModel) {
         Account account = accountRepository.findByEmail(email);
         String view = "account/checked-email";
 
         if (account == null) {
-            model.addAttribute("error", "wrong.email");
+            defaultModel.addAttribute("error", "wrong.email");
             return view;
         }
         if (!account.isValidToken(token)) {
-            model.addAttribute("error", "wrong.email");
+            defaultModel.addAttribute("error", "wrong.email");
             return view;
         }
 
         accountService.completeSignUp(account);
         accountService.login(account);
 
-        model.addAttribute("numberOfUser", accountRepository.count());
-        model.addAttribute("nickname", account.getNickname());
+        redirectModel.addFlashAttribute("numberOfUser", accountRepository.count());
+        redirectModel.addFlashAttribute("nickname", account.getNickname());
         return "redirect:/";
     }
 

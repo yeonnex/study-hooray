@@ -102,10 +102,10 @@ class AccountControllerTest {
                 .param("token", account.getEmailCheckToken())
                 .param("email", account.getEmail())
         )
-                .andExpect(view().name("account/checked-email"))
+                .andExpect(view().name("redirect:/"))
                 .andExpect(model().attributeDoesNotExist("error"))
-                .andExpect(model().attributeExists("numberOfUser"))
-                .andExpect(model().attributeExists("nickname"))
+                .andExpect(flash().attributeExists("numberOfUser"))
+                .andExpect(flash().attributeExists("nickname"))
                 .andExpect(authenticated())
         ;
 
