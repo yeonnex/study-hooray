@@ -4,15 +4,12 @@ import com.chiko.studyhooray.domain.Account;
 import com.chiko.studyhooray.model.SignUpForm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.time.LocalDateTime;
 
 @Controller
 @RequiredArgsConstructor
@@ -48,7 +45,7 @@ public class AccountController {
             model.addAttribute("error", "wrong.email");
             return view;
         }
-        if ( ! account.isValidToken(token)) {
+        if (!account.isValidToken(token)) {
             model.addAttribute("error", "wrong.email");
             return view;
         }
@@ -58,7 +55,7 @@ public class AccountController {
 
         model.addAttribute("numberOfUser", accountRepository.count());
         model.addAttribute("nickname", account.getNickname());
-        return view;
+        return "redirect:/";
     }
 
 }
