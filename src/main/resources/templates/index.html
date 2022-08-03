@@ -5,12 +5,14 @@
 </head>
 <body class="bg-light">
 
-<nav th:replace="fragments.html :: main-nav" class="navbar navbar-expand-sm navbar-dark bg-dark">
-    <div class="alert alert-warning" role="alert" th:if="${account != null && !account .emailVerified}">
-        Study Hooray 가입을 완료하려면 계정 인증 이메일을 확인하세요
-    </div>
+<nav th:replace="fragments.html :: main-nav">
 
 </nav>
+
+    <div class="alert alert-warning" role="alert" th:if="${account != null && !account.emailVerified}">
+        Study Hooray 가입을 완료하려면 <a href="/check-email"><b>계정 인증 이메일</b></a>을 확인하세요
+    </div>
+
 <div class="container">
     <div class="py-5 text-center">
         <h2>Study Hooray</h2>
@@ -22,8 +24,8 @@
 </div>
 
 
-<script src="/node_modules/jquery/dist/jquery.min.js"></script>
-<script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<!--<script src="/node_modules/jquery/dist/jquery.min.js"></script>-->
+<!--<script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>-->
 <script type="application/javascript">
     (function () {
 
