@@ -58,7 +58,7 @@ public class AccountService implements UserDetailsService {
 
     public void login(Account account) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                new UserAccount(account),
+                account,
                 account.getPassword(),
                 List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContextHolder.getContext().setAuthentication(token);
