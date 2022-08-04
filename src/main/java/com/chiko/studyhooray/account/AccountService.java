@@ -2,6 +2,7 @@ package com.chiko.studyhooray.account;
 
 import com.chiko.studyhooray.domain.Account;
 import com.chiko.studyhooray.model.SignUpForm;
+import com.chiko.studyhooray.settings.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AccountService implements UserDetailsService {
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
@@ -85,5 +87,14 @@ public class AccountService implements UserDetailsService {
             throw new UsernameNotFoundException(emailOrNickname);
         }
         return account;
+    }
+
+    public void updateProfile(Account account, Profile profile) {
+        account.setBio(profile.getBio());
+        account.setUrl(profile.getUrl());
+        account.setOccupation(profile.getOccupation());
+        account.setLocation(profile.getLocation());
+        // TODO 프로필 이미지
+        accountRepository.save(account);
     }
 }
