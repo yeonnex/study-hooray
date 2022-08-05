@@ -18,9 +18,10 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class SettingsController {
     private final AccountService accountService;
-    private static final String SETTINGS_PROFILE_VIEW_NAME = "settings/profile";
+    static final String SETTINGS_PROFILE_VIEW_NAME = "settings/profile";
+    static final String SETTINGS_PROFILE_URL = "/settings/profile";
 
-    @GetMapping("/settings/profile")
+    @GetMapping(SETTINGS_PROFILE_URL)
     public String profileUpdateForm(@CurrentUser Account account, Model model){
         model.addAttribute("account", account);
         model.addAttribute("profile", new Profile(account));
@@ -28,7 +29,7 @@ public class SettingsController {
         return "settings/profile";
     }
 
-    @PostMapping("/settings/profile")
+    @PostMapping(SETTINGS_PROFILE_URL)
     public String updateProfile(@CurrentUser Account account,
                                 @Valid @ModelAttribute Profile profile,
                                 Errors errors,
