@@ -1,6 +1,7 @@
 package com.chiko.studyhooray.account;
 
 import com.chiko.studyhooray.domain.Account;
+import com.chiko.studyhooray.model.PasswordForm;
 import com.chiko.studyhooray.model.SignUpForm;
 import com.chiko.studyhooray.settings.Profile;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +9,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -95,6 +95,13 @@ public class AccountService implements UserDetailsService {
         account.setOccupation(profile.getOccupation());
         account.setLocation(profile.getLocation());
         // TODO 프로필 이미지
+        accountRepository.save(account);
+    }
+
+    public void updatePassword(Account account, PasswordForm form) {
+        String newPassword = passwordEncoder.encode(form.getNewPassword());
+        account.setPassword(newPassword);
+
         accountRepository.save(account);
     }
 }
