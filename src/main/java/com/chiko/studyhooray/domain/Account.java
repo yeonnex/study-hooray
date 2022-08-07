@@ -29,6 +29,7 @@ public class Account {
     private boolean emailVerified;
 
     private String emailCheckToken;
+    private LocalDateTime emailCheckTokenGeneratedAt;
 
     private LocalDateTime joinedAt;
 
@@ -67,5 +68,9 @@ public class Account {
 
     public boolean isValidToken(String token) {
         return token.equals(this.emailCheckToken);
+    }
+
+    public boolean canSendConfirmEmail() {
+        return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
     }
 }

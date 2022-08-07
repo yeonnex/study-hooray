@@ -3,12 +3,16 @@ package com.chiko.studyhooray.account;
 import com.chiko.studyhooray.domain.Account;
 import com.chiko.studyhooray.model.PasswordForm;
 import com.chiko.studyhooray.model.SignUpForm;
+import com.chiko.studyhooray.settings.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +22,8 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AccountService {
+@Transactional
+public class AccountService implements UserDetailsService {
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
@@ -42,7 +47,7 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    private void sendSignUpConfirmEmail(Account newAccount) {
+    public void sendSignUpConfirmEmail(Account newAccount) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
 
         mailMessage.setTo(newAccount.getEmail());
@@ -55,7 +60,7 @@ public class AccountService {
 
     public void login(Account account) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                account.getNickname(),
+                account,
                 account.getPassword(),
                 List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContextHolder.getContext().setAuthentication(token);
@@ -66,8 +71,6 @@ public class AccountService {
         account.setJoinedAt(LocalDateTime.now());
         account.setEmailVerified(true);
     }
-<<<<<<< HEAD
-=======
 
     @Override
     public UserDetails loadUserByUsername(String emailOrNickname) {
@@ -101,5 +104,4 @@ public class AccountService {
 
         accountRepository.save(account);
     }
->>>>>>> 0033a13 (패스워드 수정, 패스워드 수정 테스트)
 }
