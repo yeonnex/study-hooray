@@ -8,8 +8,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -32,30 +34,71 @@ public class AccountController {
         signUpFormValidator.validate(signUpForm, errors);
 
         Account account = accountService.processNewAccount(signUpForm);
-//        accountService.login(account); TODO 이 코드 지워야할것 같다. 회원가입 절차를 아직 다 complete 하게 거치지 못했는데, 시큐리티 컨텍스트에 벌써 넣으면 안된다고 생각함.
+        accountService.login(account);
         return "redirect:/";
     }
 
+    /**
+     *
+     * @param token
+     * @param email
+     * @param redirectModel
+     * @param defaultModel
+     * @return
+     */
     @GetMapping("/check-email-token")
-    public String checkEmailToken(@RequestParam String token, @RequestParam String email, Model model) {
+    public String checkEmailToken(@RequestParam String token,
+                                  @RequestParam String email,
+                                  RedirectAttributes redirectModel,
+                                  Model defaultModel) {
         Account account = accountRepository.findByEmail(email);
         String view = "account/checked-email";
 
         if (account == null) {
-            model.addAttribute("error", "wrong.email");
+            defaultModel.addAttribute("error", "wrong.email");
             return view;
         }
         if (!account.isValidToken(token)) {
-            model.addAttribute("error", "wrong.email");
+            defaultModel.addAttribute("error", "wrong.email");
             return view;
         }
 
         accountService.completeSignUp(account);
         accountService.login(account);
 
-        model.addAttribute("numberOfUser", accountRepository.count());
-        model.addAttribute("nickname", account.getNickname());
+        defaultModel.addAttribute("numberOfUser", accountRepository.count());
+        defaultModel.addAttribute("nickname", account.getNickname());
+
+        return view;
+    }
+
+    @GetMapping("/check-email")
+    public String alertEmail(@CurrentUser Account account, Model model) {
+        model.addAttribute("email", account.getEmail());
+        return "account/check-email";
+    }
+
+    @GetMapping("/resend-confirm-email")
+    public String resendConfirmEmail(@CurrentUser Account account, Model model) {
+        if (!account.canSendConfirmEmail()) {
+            model.addAttribute("error", "인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
+            model.addAttribute("email", account.getEmail());
+            return "account/check-email";
+        }
+        accountService.sendSignUpConfirmEmail(account);
         return "redirect:/";
+    }
+
+    @GetMapping("/profile/{nickname}")
+    public String profileView(@PathVariable String nickname, Model model, @CurrentUser Account account) throws IllegalAccessException {
+        Account byNickname = accountRepository.findByNickname(nickname);
+        if (byNickname == null) {
+            throw new IllegalAccessException(nickname);
+        }
+        model.addAttribute("account", account);
+        model.addAttribute("isOwner", byNickname.equals(account));
+
+        return "account/profile";
     }
 
 }
