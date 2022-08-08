@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments.html :: head">
+</head>
+
+<body class="bg-light">
+<div th:replace="fragments.html :: main-nav"></div>
+<div class="container">
+    <div class="row mt-5 justify-content-center">
+        <div class="col-2">
+            <div th:replace="fragments.html :: settings-menu (tags)"></div>
+        </div>
+        <div class="col-8">
+            <div class="row">
+                <h2 class="col-12">관심있는 스터디 주제</h2>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        참여하고 싶은 스터디 주제를 입력해주세요. 해당 주제의 스터디가 생기면 알림을 받을 수 있습니다. 태그를 입력하고 콤마(,)
+                        또는 엔터를 입력하세요.
+                    </div>
+                </div>
+                <input id="tags" type="text" name="tags" th:value="${#strings.listJoin(tags, ',')}"  aria-describedby="tagHelp">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="/node_modules/@yaireo/tagify/dist/tagify.min.js"></script>
+<script type="application/javascript">
+
+    const header = document.querySelector('meta[name="_csrf_header"]');
+    const token = document.querySelector('meta[name="_csrf"]').content;
+
+    window.onload = function () {
+        /**
+         *
+         * @param url {String}
+         * @param tagTitle {String}
+         */
+        function tagRequest(url, tagTitle) {
+            let requestObject = {
+                'tagTitle': tagTitle
+            };
+            let body = JSON.stringify(requestObject);
+
+            fetch(`tags/${url}`, {
+                method: 'POST',
+                headers: {
+                    'header':header,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': token
+                },
+                body: body,
+
+            }).then(res => {
+                if (res.status !== 200) {
+                    throw Error();
+                }
+                console.log('res = ', res);
+            }).catch(err => {
+                console.log('err = ', err);
+            });
+        }
+        function onAdd(e) {
+
+            tagRequest("add", e.detail.data.value);
+        }
+
+        function onRemove(e) {
+            tagRequest("remove", e.detail.data.value);
+        }
+
+        var tagInput = document.querySelector("#tags");
+        var tagify = new Tagify(tagInput)
+        tagify.on("add", onAdd);
+        tagify.on("remove", onRemove);
+
+
+    };
+
+</script>
+</body>
+</html>

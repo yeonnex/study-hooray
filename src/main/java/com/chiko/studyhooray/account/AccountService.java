@@ -1,6 +1,7 @@
 package com.chiko.studyhooray.account;
 
 import com.chiko.studyhooray.domain.Account;
+import com.chiko.studyhooray.domain.Tag;
 import com.chiko.studyhooray.model.PasswordForm;
 import com.chiko.studyhooray.model.SignUpForm;
 import com.chiko.studyhooray.settings.Profile;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -103,5 +105,10 @@ public class AccountService implements UserDetailsService {
         account.setPassword(newPassword);
 
         accountRepository.save(account);
+    }
+
+    public void addTag(Account account, Tag tag) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a -> a.getTags().add(tag));
     }
 }

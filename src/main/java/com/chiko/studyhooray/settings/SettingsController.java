@@ -3,26 +3,35 @@ package com.chiko.studyhooray.settings;
 import com.chiko.studyhooray.account.AccountService;
 import com.chiko.studyhooray.account.CurrentUser;
 import com.chiko.studyhooray.domain.Account;
+import com.chiko.studyhooray.domain.Tag;
 import com.chiko.studyhooray.model.PasswordForm;
+import com.chiko.studyhooray.model.TagForm;
+import com.chiko.studyhooray.tag.TagRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
 public class SettingsController {
     private final AccountService accountService;
+    private final TagRepository tagRepository;
     static final String SETTINGS_PROFILE_VIEW_NAME = "settings/profile";
     static final String SETTINGS_PROFILE_URL = "/settings/profile";
     static final String SETTINGS_PASSWORD_VIEW_NAME = "settings/password";
     static final String SETTINGS_PASSWORD_URL = "/settings/password";
+    static final String SETTINGS_TAGS_VIEW_NAME = "settings/tags";
+    static final String SETTINGS_TAGS_URL = "/settings/tags";
 
     @GetMapping(SETTINGS_PROFILE_URL)
     public String updateProfileForm(@CurrentUser Account account, Model model){
@@ -73,4 +82,23 @@ public class SettingsController {
         attributes.addFlashAttribute("account", account);
         return "redirect:/" + SETTINGS_PASSWORD_VIEW_NAME;
     }
+
+    @GetMapping(SETTINGS_TAGS_URL)
+    public String updateTags(@CurrentUser Account account, Model model) {
+        model.addAttribute(account);
+
+        return SETTINGS_TAGS_VIEW_NAME;
+    }
+    // ajax 요청
+    @PostMapping("/settings/tags/add")
+    public ResponseEntity addTag(@CurrentUser Account account, @RequestBody TagForm tagForm) {
+        String title = tagForm.getTagTitle();
+        Tag tag = tagRepository.findByTitle(title);
+        if (tag == null) {
+            tagRepository.save(Tag.builder().title(tagForm.getTagTitle()).build());
+        }
+        accountService.addTag(account, tag);
+        return ResponseEntity.ok().build();
+    }
+
 }
